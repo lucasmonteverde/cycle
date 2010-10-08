@@ -238,7 +238,7 @@ function buildOptions($cont, $slides, els, options, o) {
 		$cont.height(opts.height);
 
 	if (opts.startingSlide)
-		opts.startingSlide = parseInt(opts.startingSlide);
+		opts.startingSlide = parseInt(opts.startingSlide,10);
 	else if (opts.backwards)
 		opts.startingSlide = els.length - 1;
 
@@ -343,10 +343,10 @@ function buildOptions($cont, $slides, els, options, o) {
 		$($slides[first]).css(opts.cssFirst);
 
 	if (opts.timeout) {
-		opts.timeout = parseInt(opts.timeout);
+		opts.timeout = parseInt(opts.timeout,10);
 		// ensure that timeout and speed settings are sane
 		if (opts.speed.constructor == String)
-			opts.speed = $.fx.speeds[opts.speed] || parseInt(opts.speed);
+			opts.speed = $.fx.speeds[opts.speed] || parseInt(opts.speed,10);
 		if (!opts.sync)
 			opts.speed = opts.speed / 2;
 		
@@ -789,7 +789,7 @@ $.fn.cycle.hopsFromLast = function(opts, fwd) {
 function clearTypeFix($slides) {
 	debug('applying clearType background-color hack');
 	function hex(s) {
-		s = parseInt(s).toString(16);
+		s = parseInt(s,10).toString(16);
 		return s.length < 2 ? '0'+s : s;
 	};
 	function getBg(e) {
@@ -847,7 +847,7 @@ $.fn.cycle.transitions = {
 	fade: function($cont, $slides, opts) {
 		$slides.not(':eq('+opts.currSlide+')').css('opacity',0);
 		opts.before.push(function(curr,next,opts) {
-			$.fn.cycle.commonReset(curr,next,opts);
+			$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 			opts.cssBefore.opacity = 0;
 		});
 		opts.animIn	   = { opacity: 1 };
@@ -986,7 +986,7 @@ $.fn.cycle.transitions.scrollHorz = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts, fwd) {
 		if (opts.rev)
 			fwd = !fwd;
-		$.fn.cycle.commonReset(curr,next,opts);
+		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		opts.cssBefore.left = fwd ? (next.cycleW-1) : (1-next.cycleW);
 		opts.animOut.left = fwd ? -curr.cycleW : curr.cycleW;
 	});
@@ -1000,7 +1000,7 @@ $.fn.cycle.transitions.scrollVert = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts, fwd) {
 		if (opts.rev)
 			fwd = !fwd;
-		$.fn.cycle.commonReset(curr,next,opts);
+		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		opts.cssBefore.top = fwd ? (1-next.cycleH) : (next.cycleH-1);
 		opts.animOut.top = fwd ? curr.cycleH : -curr.cycleH;
 	});
@@ -1014,7 +1014,7 @@ $.fn.cycle.transitions.scrollVert = function($cont, $slides, opts) {
 $.fn.cycle.transitions.slideX = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts) {
 		$(opts.elements).not(curr).hide();
-		$.fn.cycle.commonReset(curr,next,opts,false,true);
+		$.fn.cycle.commonReset(curr,next,opts,false,true,false);
 		opts.animIn.width = next.cycleW;
 	});
 	opts.cssBefore = { left: 0, top: 0, width: 0 };
@@ -1070,7 +1070,7 @@ $.fn.cycle.transitions.shuffle = function($cont, $slides, opts) {
 			}
 			else {
 				var z = $(curr).css('z-index');
-				$el.css('z-index', parseInt(z)+1+count);
+				$el.css('z-index', parseInt(z,10)+1+count);
 			}
 			$el.animate({left:0, top:0}, opts.speedOut, opts.easeOut, function() {
 				$(fwd ? this : curr).hide();
@@ -1096,7 +1096,7 @@ $.fn.cycle.transitions.turnUp = function($cont, $slides, opts) {
 };
 $.fn.cycle.transitions.turnDown = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts,true,false);
+		$.fn.cycle.commonReset(curr,next,opts,true,false,false);
 		opts.animIn.height = next.cycleH;
 		opts.animOut.top   = curr.cycleH;
 	});
@@ -1116,7 +1116,7 @@ $.fn.cycle.transitions.turnLeft = function($cont, $slides, opts) {
 };
 $.fn.cycle.transitions.turnRight = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts,false,true);
+		$.fn.cycle.commonReset(curr,next,opts,false,true,false);
 		opts.animIn.width = next.cycleW;
 		opts.animOut.left = curr.cycleW;
 	});
@@ -1141,7 +1141,7 @@ $.fn.cycle.transitions.zoom = function($cont, $slides, opts) {
 // fadeZoom
 $.fn.cycle.transitions.fadeZoom = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts,false,false);
+		$.fn.cycle.commonReset(curr,next,opts,false,false,false);
 		opts.cssBefore.left = next.cycleW/2;
 		opts.cssBefore.top = next.cycleH/2;
 		opts.animIn	= { top: 0, left: 0, width: next.cycleW, height: next.cycleH };
@@ -1154,7 +1154,7 @@ $.fn.cycle.transitions.fadeZoom = function($cont, $slides, opts) {
 $.fn.cycle.transitions.blindX = function($cont, $slides, opts) {
 	var w = $cont.css('overflow','hidden').width();
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts);
+		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		opts.animIn.width = next.cycleW;
 		opts.animOut.left   = curr.cycleW;
 	});
@@ -1166,7 +1166,7 @@ $.fn.cycle.transitions.blindX = function($cont, $slides, opts) {
 $.fn.cycle.transitions.blindY = function($cont, $slides, opts) {
 	var h = $cont.css('overflow','hidden').height();
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts);
+		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		opts.animIn.height = next.cycleH;
 		opts.animOut.top   = curr.cycleH;
 	});
@@ -1191,7 +1191,7 @@ $.fn.cycle.transitions.blindZ = function($cont, $slides, opts) {
 // growX - grow horizontally from centered 0 width
 $.fn.cycle.transitions.growX = function($cont, $slides, opts) {
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts,false,true);
+		$.fn.cycle.commonReset(curr,next,opts,false,true,false);
 		opts.cssBefore.left = this.cycleW/2;
 		opts.animIn = { left: 0, width: this.cycleW };
 		opts.animOut = { left: 0 };
@@ -1236,7 +1236,7 @@ $.fn.cycle.transitions.cover = function($cont, $slides, opts) {
 	var w = $cont.css('overflow','hidden').width();
 	var h = $cont.height();
 	opts.before.push(function(curr, next, opts) {
-		$.fn.cycle.commonReset(curr,next,opts);
+		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		if (d == 'right')
 			opts.cssBefore.left = -w;
 		else if (d == 'up')
@@ -1304,8 +1304,8 @@ $.fn.cycle.transitions.wipe = function($cont, $slides, opts) {
 		else if (/b2t/.test(opts.clip))
 			clip = 'rect('+h+'px '+w+'px '+h+'px 0px)';
 		else if (/zoom/.test(opts.clip)) {
-			var top = parseInt(h/2);
-			var left = parseInt(w/2);
+			var top = parseInt(h/2,10);
+			var left = parseInt(w/2,10);
 			clip = 'rect('+top+'px '+left+'px '+top+'px '+left+'px)';
 		}
 	}
@@ -1313,7 +1313,7 @@ $.fn.cycle.transitions.wipe = function($cont, $slides, opts) {
 	opts.cssBefore.clip = opts.cssBefore.clip || clip || 'rect(0px 0px 0px 0px)';
 
 	var d = opts.cssBefore.clip.match(/(\d+)/g);
-	var t = parseInt(d[0]), r = parseInt(d[1]), b = parseInt(d[2]), l = parseInt(d[3]);
+	var t = parseInt(d[0],10), r = parseInt(d[1],10), b = parseInt(d[2],10), l = parseInt(d[3],10);
 
 	opts.before.push(function(curr, next, opts) {
 		if (curr == next) return;
@@ -1321,12 +1321,12 @@ $.fn.cycle.transitions.wipe = function($cont, $slides, opts) {
 		$.fn.cycle.commonReset(curr,next,opts,true,true,false);
 		opts.cssAfter.display = 'block';
 
-		var step = 1, count = parseInt((opts.speedIn / 13)) - 1;
+		var step = 1, count = parseInt((opts.speedIn / 13),10) - 1;
 		(function f() {
-			var tt = t ? t - parseInt(step * (t/count)) : 0;
-			var ll = l ? l - parseInt(step * (l/count)) : 0;
-			var bb = b < h ? b + parseInt(step * ((h-b)/count || 1)) : h;
-			var rr = r < w ? r + parseInt(step * ((w-r)/count || 1)) : w;
+			var tt = t ? t - parseInt(step * (t/count),10) : 0;
+			var ll = l ? l - parseInt(step * (l/count),10) : 0;
+			var bb = b < h ? b + parseInt(step * ((h-b)/count || 1),10) : h;
+			var rr = r < w ? r + parseInt(step * ((w-r)/count || 1),10) : w;
 			$next.css({ clip: 'rect('+tt+'px '+rr+'px '+bb+'px '+ll+'px)' });
 			(step++ <= count) ? setTimeout(f, 13) : $curr.css('display', 'none');
 		})();
